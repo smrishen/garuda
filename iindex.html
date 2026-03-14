@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Scam Awareness Website</title>
+    <link rel="stylesheet" href="sstyle.css">
+</head>
+
+<body>
+    <div class="main-content">
+        <h1>Stay Safe Online</h1>
+        <p>Learn to spot scams and protect yourself from online threats.</p>
+        <p>Take our interactive quiz to test your scam-spotting skills!</p>
+        <button id="open-quiz-btn">Take the Quiz</button>
+    </div>
+
+    <!-- Quiz Modal -->
+    <div id="quiz-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="quiz-box">
+                <p id="progress"></p>
+                <div id="progress-container">
+                    <div id="progress-bar"></div>
+                </div>
+                <p class="message" id="message"></p>
+                <p>Would you trust this?</p>
+                <div class="buttons">
+                    <button onclick="answer('Yes')">👍 Yes</button>
+                    <button onclick="answer('No')">👎 No</button>
+                </div>
+                <p id="result"></p>
+                <button id="next-btn" onclick="nextQuestion()" style="display:none;">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
