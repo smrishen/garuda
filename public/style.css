@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════
-   ScamShield — Dashboard Theme Stylesheet
+   Garuda — Dashboard Theme Stylesheet
    ══════════════════════════════════════════════ */
 
 /* ── CSS Variables ── */
@@ -43,6 +43,34 @@
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
   --sidebar-width: 260px;
+}
+
+/* ── Light Mode Variables ── */
+:root.light-mode {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-card-hover: rgba(255, 255, 255, 1);
+  --bg-input: #ffffff;
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+
+  --accent-primary: #4f46e5;
+  --accent-secondary: #7c3aed;
+  --accent-glow: rgba(79, 70, 229, 0.2);
+
+  --border-color: rgba(0, 0, 0, 0.1);
+  --border-glow: rgba(79, 70, 229, 0.3);
+
+  --glass-bg: rgba(0, 0, 0, 0.03);
+  --glass-border: rgba(0, 0, 0, 0.08);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.12);
+  --shadow-glow: 0 0 30px rgba(79, 70, 229, 0.15);
 }
 
 /* ── Reset & Base ── */
@@ -119,6 +147,74 @@ body {
   66% { transform: translate(-20px, 20px) scale(0.9); }
 }
 
+/* ── Theme Toggle Button ── */
+.theme-toggle {
+  position: fixed;
+  top: 24px;
+  right: 32px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-toggle:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.theme-toggle svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  position: absolute;
+}
+
+.icon-sun {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.5);
+}
+
+.icon-moon {
+  opacity: 1;
+  transform: rotate(0) scale(1);
+}
+
+:root.light-mode .icon-sun {
+  opacity: 1;
+  transform: rotate(0) scale(1);
+}
+
+:root.light-mode .icon-moon {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.5);
+}
+
+@media (max-width: 768px) {
+  .theme-toggle {
+    top: 14px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+  }
+  .theme-toggle svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
 /* ══════════════════════════════════════
    SIDEBAR
    ══════════════════════════════════════ */
@@ -129,13 +225,13 @@ body {
   top: 0;
   bottom: 0;
   width: var(--sidebar-width);
-  background: rgba(10, 10, 18, 0.95);
+  background: var(--bg-card);
   border-right: 1px solid var(--border-color);
   backdrop-filter: blur(24px);
   display: flex;
   flex-direction: column;
   z-index: 100;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
 }
 
 .sidebar-brand {
@@ -172,6 +268,14 @@ body {
   font-weight: 800;
   letter-spacing: -0.3px;
   background: linear-gradient(135deg, #e8e8f0, #a0a0c0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+:root.light-mode .brand-name,
+:root.light-mode .mobile-brand {
+  background: linear-gradient(135deg, #1e293b, #475569);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -272,13 +376,14 @@ body {
   left: 0;
   right: 0;
   height: 56px;
-  background: rgba(10, 10, 18, 0.95);
+  background: var(--bg-card);
   border-bottom: 1px solid var(--border-color);
   backdrop-filter: blur(24px);
   z-index: 99;
   align-items: center;
   padding: 0 16px;
   gap: 14px;
+  transition: background-color 0.3s ease;
 }
 
 .hamburger {
@@ -322,6 +427,207 @@ body {
   margin-left: var(--sidebar-width);
   min-height: 100vh;
   padding: 40px 48px 60px;
+}
+
+/* ══════════════════════════════════════
+   Interactive Quiz Modal & Floating Button
+   ══════════════════════════════════════ */
+
+/* Floating Quiz Button */
+.floating-quiz-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff6b6b, #10b981);
+  color: white;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: floatBounce 3s infinite ease-in-out;
+}
+
+.floating-quiz-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes floatBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Modal Background */
+.quiz-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  overflow: auto;
+}
+
+/* Modal Content Box */
+.quiz-modal-content {
+  background: var(--bg-card);
+  margin: 10% auto;
+  padding: 0;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 500px;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  animation: modalFadeIn 0.3s ease-out;
+  position: relative;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Close Button */
+.quiz-close {
+  color: #aaa;
+  position: absolute;
+  right: 20px;
+  top: 15px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 10;
+  transition: color 0.2s;
+}
+
+.quiz-close:hover {
+  color: var(--text-primary);
+}
+
+/* Quiz Inner Container */
+.quiz-box {
+  padding: 35px;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.quiz-box h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+#quiz-progress {
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: var(--text-secondary);
+}
+
+#quiz-progress-container {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  margin-bottom: 25px;
+  overflow: hidden;
+}
+
+.light-mode #quiz-progress-container {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+#quiz-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6b6b, #10b981);
+  width: 0%;
+  transition: width 0.5s ease;
+  border-radius: 4px;
+}
+
+.quiz-message {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 18px;
+  border-radius: 12px;
+  font-style: italic;
+  margin-bottom: 20px;
+  border: 1px solid var(--glass-border);
+  line-height: 1.5;
+}
+
+.light-mode .quiz-message {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.quiz-box p {
+  margin-bottom: 15px;
+}
+
+/* Option Buttons */
+.quiz-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.quiz-buttons button {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+  color: white;
+}
+
+.quiz-btn-yes { background: #ef4444; }
+.quiz-btn-no { background: #10b981; }
+
+.quiz-buttons button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.quiz-buttons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Result Feedback */
+#quiz-result {
+  margin-top: 20px;
+  font-weight: 500;
+  min-height: 40px;
+}
+
+#quiz-result.correct { color: #10b981; }
+#quiz-result.incorrect { color: #ef4444; }
+
+.quiz-btn-next {
+  margin-top: 15px;
+  padding: 10px 25px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.quiz-btn-next:hover {
+  background: #2563eb;
 }
 
 /* ── Views ── */

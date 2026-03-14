@@ -1,5 +1,5 @@
 """
-ScamShield — Python Backend Server
+Garuda — Python Backend Server
 Flask server serving the static frontend and /api/analyze endpoint.
 """
 
@@ -104,6 +104,67 @@ def report_scam():
         return jsonify({"error": "An error occurred while submitting the report."}), 500
 
 
+QUIZ_DATA = [
+    {
+        "message": "Vehicle no KA19MM0404 has been booked for violation in traffic rules. Details may be viewed at https://itmschalan.parivahan.govv.in/approved-report?id=MTECE4354.MoRTH",
+        "correct": "No",
+        "explanation": "This is a common traffic violation scam. Always verify the link beforehand, and check the patterns. Always check the official Parivahan website directly."
+    },
+    {
+        "message": "Your bank account will be suspended today. Click here to verify immediately.",
+        "correct": "No",
+        "explanation": "Banks never ask for verification through random links."
+    },
+    {
+        "message": "Congratulations! You won an iPhone. Pay ₹99 shipping to receive it.",
+        "correct": "No",
+        "explanation": "Fake prize scams trick users into paying small fees."
+    },
+    {
+        "message": "Your OTP is required to complete your KYC update. Reply with the OTP.",
+        "correct": "No",
+        "explanation": "No company will ask for OTP through messages."
+    },
+    {
+        "message": "Hi mom, I lost my phone. This is my new number. Send ₹5000 urgently.",
+        "correct": "No",
+        "explanation": "This is a common impersonation scam."
+    },
+    {
+        "message": "Your electricity will be disconnected tonight. Pay bill immediately using this link.",
+        "correct": "No",
+        "explanation": "Utility companies don't threaten sudden disconnections via SMS."
+    },
+    {
+        "message": "Amazon: Your account has suspicious activity. Login here immediately.",
+        "correct": "No",
+        "explanation": "Fake login links are used to steal passwords."
+    },
+    {
+        "message": "You received a job offer abroad. Pay ₹2000 processing fee.",
+        "correct": "No",
+        "explanation": "Legitimate jobs do not ask for money upfront."
+    },
+    {
+        "message": "Netflix subscription failed. Update payment details here.",
+        "correct": "No",
+        "explanation": "Always check official websites instead of SMS links."
+    },
+    {
+        "message": "Your PAN card will be blocked. Verify details in this link.",
+        "correct": "No",
+        "explanation": "Government services never request verification through random links."
+    }
+]
+
+@app.route('/quiz', methods=['GET'])
+def get_quiz():
+    return jsonify(QUIZ_DATA)
+
+
+import database
+
 if __name__ == '__main__':
-    print("Scam Language Detector running at http://localhost:3000")
+    database.init_db()
+    print("Garuda running at http://localhost:3000")
     app.run(host='0.0.0.0', port=3000, debug=True)

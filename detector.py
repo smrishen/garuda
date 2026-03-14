@@ -5,6 +5,7 @@ a risk assessment with detailed warning signals.
 """
 
 import re
+import database
 
 
 SCAM_PATTERNS = [
@@ -283,14 +284,14 @@ def _generate_summary(risk_level: str, warnings: list) -> str:
     if risk_level == "Critical":
         return (
             f"DANGER: This message shows {len(warnings)} major scam indicators including "
-            f"{', '.join(categories[:3])}. This is almost certainly a scam. "
+            f"{', '.join(categories)}. This is almost certainly a scam. "
             "Do NOT respond, click any links, or share personal information."
         )
 
     if risk_level == "High":
         return (
             f"HIGH RISK: This message contains {len(warnings)} warning signals "
-            f"({', '.join(categories[:3])}). This message is very likely fraudulent. "
+            f"({', '.join(categories)}). This message is very likely fraudulent. "
             "Exercise extreme caution."
         )
 
@@ -370,6 +371,8 @@ def lookup_contact(query: str) -> dict:
     # Determine type
     if "@" in cleaned:
         contact_type = "Email"
+    elif cleaned.startswith("http://") or cleaned.startswith("https://") or re.search(r"\.(com|org|net|co|io|ly|gl|vc|st|info|biz)\b", cleaned):
+        contact_type = "URL"
     else:
         # Normalize phone: strip spaces, dashes, parens
         cleaned = re.sub(r"[\s\-\(\).]", "", cleaned)
@@ -390,6 +393,20 @@ def lookup_contact(query: str) -> dict:
                 "reports": info["reports"],
                 "riskLevel": info["riskLevel"],
             }
+
+    # Search the SQLite Database for user reports
+    db_result = database.search_scam(cleaned, contact_type)
+    if db_result:
+        # We classify user reports as generic "High" risk automatically for now
+        return {
+            "isScam": True,
+            "query": query.strip(),
+            "type": contact_type,
+            "category": db_result["category"],
+            "description": f"Reported by {db_result['reports']} user(s): {db_result['description']}",
+            "reports": db_result["reports"],
+            "riskLevel": "High",
+        }
 
     return {
         "isScam": False,
@@ -432,10 +449,6 @@ SCAM_HEATMAP_DATA = [
     {"lat": 28.5355, "lng": 77.3910, "intensity": 0.73, "city": "Noida", "state": "Uttar Pradesh", "reports": 6200},
 ]
 
-# In-memory store for user-submitted reports
-_user_reports = []
-
-
 def get_heatmap_data() -> list:
     """Return heatmap data points for the India scam map."""
     return SCAM_HEATMAP_DATA
@@ -443,7 +456,9 @@ def get_heatmap_data() -> list:
 
 def get_report_stats() -> dict:
     """Return aggregate statistics for the dashboard."""
-    total_reports = sum(city["reports"] for city in SCAM_HEATMAP_DATA) + len(_user_reports)
+    # Note: user_reports from the DB isn't added to total_reports here to keep it simple,
+    # but we could count rows in the future.
+    total_reports = sum(city["reports"] for city in SCAM_HEATMAP_DATA)
     top_city = max(SCAM_HEATMAP_DATA, key=lambda c: c["reports"])
     top_states = {}
     for city in SCAM_HEATMAP_DATA:
@@ -457,7 +472,6 @@ def get_report_stats() -> dict:
         "topCityReports": top_city["reports"],
         "mostAffectedState": most_affected_state,
         "mostAffectedStateReports": top_states[most_affected_state],
-        "userReports": len(_user_reports),
     }
 
 
@@ -468,11 +482,16 @@ def submit_report(report: dict) -> dict:
         if field not in report or not report[field]:
             return {"success": False, "error": f"Missing required field: {field}"}
 
-    _user_reports.append({
-        "type": report["type"],
-        "contact": report["contact"],
-        "category": report["category"],
-        "description": report["description"],
-    })
+    # Map frontend types to backend lookup types
+    type_map = {
+        "phone": "Phone",
+        "email": "Email",
+        "website": "URL",
+        "social": "Social"
+    }
+    
+    report["type"] = type_map.get(str(report["type"]).lower(), str(report["type"]).capitalize())
+
+    database.save_report(report)
 
     return {"success": True, "message": "Thank you! Your report has been submitted successfully."}

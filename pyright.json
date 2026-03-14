@@ -1,0 +1,46 @@
+{
+    "version": "1.1.408",
+    "time": "1773468410040",
+    "generalDiagnostics": [
+        {
+            "file": "c:\\Users\\ksmri\\OneDrive\\Desktop\\fraud\\detector.py",
+            "severity": "error",
+            "message": "No overloads for \"max\" match the provided arguments",
+            "range": {
+                "start": {
+                    "line": 450,
+                    "character": 26
+                },
+                "end": {
+                    "line": 450,
+                    "character": 61
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "c:\\Users\\ksmri\\OneDrive\\Desktop\\fraud\\detector.py",
+            "severity": "error",
+            "message": "Argument of type \"Overload[(key: Unknown, default: None = None, /) -> (Unknown | None), (key: Unknown, default: Unknown, /) -> Unknown, (key: Unknown, default: _T@get, /) -> (Unknown | _T@get)]\" cannot be assigned to parameter \"key\" of type \"(_T@max) -> SupportsRichComparison\" in function \"max\"\n  No overloaded function matches type \"(Unknown) -> SupportsRichComparison\"",
+            "range": {
+                "start": {
+                    "line": 450,
+                    "character": 46
+                },
+                "end": {
+                    "line": 450,
+                    "character": 60
+                }
+            },
+            "rule": "reportArgumentType"
+        }
+    ],
+    "summary": {
+        "filesAnalyzed": 2,
+        "errorCount": 2,
+        "warningCount": 0,
+        "informationCount": 0,
+        "timeInSec": 0.972
+    }
+}
+

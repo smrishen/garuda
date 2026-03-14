@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description"
-    content="ScamShield — India's scam intelligence dashboard. Detect scam messages, verify contacts, and explore scam heatmap data across India.">
+    content="Garuda — India's scam intelligence dashboard. Detect scam messages, verify contacts, and explore scam heatmap data across India.">
   <title>Garuda</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,6 +17,26 @@
 </head>
 
 <body>
+
+  <!-- ── Theme Toggle ── -->
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark/Light Mode">
+    <!-- Sun Icon (Light Mode) -->
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+    <!-- Moon Icon (Dark Mode) -->
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+  </button>
 
   <!-- ── Interactive Grid Background ── -->
   <canvas id="gridCanvas"></canvas>
@@ -34,7 +54,7 @@
         </svg>
       </div>
       <div class="brand-text">
-        <span class="brand-name">ScamShield</span>
+        <span class="brand-name">Garuda</span>
         <span class="brand-tagline">Intelligence Dashboard</span>
       </div>
     </div>
@@ -459,8 +479,40 @@
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <!-- Leaflet Heat Plugin -->
-  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>  <!-- ═══ FLOATING QUIZ OBLIGATORY HTML ═══ -->
+  <!-- Floating Quiz Button -->
+  <button id="open-quiz-btn" class="floating-quiz-btn" title="Take the Scam Awareness Quiz">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24">
+      <circle cx="12" cy="12" r="10"></circle>
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+      <line x1="12" y1="17" x2="12.01" y2="17"></line>
+    </svg>
+  </button>
+
+  <!-- Quiz Modal -->
+  <div id="quiz-modal" class="quiz-modal">
+      <div class="quiz-modal-content">
+          <span class="quiz-close">&times;</span>
+          <div class="quiz-box">
+              <p id="quiz-progress"></p>
+              <div id="quiz-progress-container">
+                  <div id="quiz-progress-bar"></div>
+              </div>
+              <p class="quiz-message" id="quiz-message"></p>
+              <p>Would you trust this?</p>
+              <div class="quiz-buttons">
+                  <button class="quiz-btn-yes" onclick="answerQuiz('Yes')">👍 Yes</button>
+                  <button class="quiz-btn-no" onclick="answerQuiz('No')">👎 No</button>
+              </div>
+              <p id="quiz-result"></p>
+              <button id="quiz-next-btn" class="quiz-btn-next" onclick="nextQuizQuestion()" style="display:none;">Next</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- ═══ Scripts ═══ -->
   <script src="app.js"></script>
+
 </body>
 
 </html>

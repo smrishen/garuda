@@ -1,0 +1,19 @@
+detector.py:223: error: "object" has no attribute "__iter__"; maybe "__dir__" or "__str__"? (not iterable)  [attr-defined]
+detector.py:234: error: Unsupported operand types for + ("object" and "int")  [operator]
+detector.py:259: error: No overload variant of "get" of "dict" matches argument types "object", "int"  [call-overload]
+detector.py:259: note: Possible overload variants:
+detector.py:259: note:     def get(self, str, None = ..., /) -> int | None
+detector.py:259: note:     def get(self, str, int, /) -> int
+detector.py:259: note:     def [_T] get(self, str, _T, /) -> int | _T
+detector.py:262: error: Generator has incompatible item type "object"; expected "bool"  [misc]
+detector.py:436: error: Need type annotation for "_user_reports" (hint: "_user_reports: list[<type>] = ...")  [var-annotated]
+detector.py:446: error: Generator has incompatible item type "object"; expected "bool"  [misc]
+detector.py:447: error: Argument "key" to "max" has incompatible type "Callable[[dict[str, object]], object]"; expected "Callable[[dict[str, object]], SupportsDunderLT[Any] | SupportsDunderGT[Any]]"  [arg-type]
+detector.py:447: error: Incompatible return value type (got "object", expected "SupportsDunderLT[Any] | SupportsDunderGT[Any]")  [return-value]
+detector.py:448: error: Need type annotation for "top_states" (hint: "top_states: dict[<type>, <type>] = ...")  [var-annotated]
+detector.py:451: error: Argument "key" to "max" has incompatible type overloaded function; expected "Callable[[object], SupportsDunderLT[Any] | SupportsDunderGT[Any]]"  [arg-type]
+server.py:7: error: Library stubs not installed for "flask_cors"  [import-untyped]
+server.py:7: note: Hint: "python3 -m pip install types-Flask-Cors"
+server.py:7: note: (or run "mypy --install-types" to install all missing stub packages)
+server.py:7: note: See https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
+Found 11 errors in 2 files (checked 2 source files)

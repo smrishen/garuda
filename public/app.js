@@ -1,5 +1,5 @@
 /**
- * ScamShield — Dashboard Application Logic
+ * Garuda — Dashboard Application Logic
  */
 
 // ══════════════════════════════════════
@@ -63,6 +63,35 @@ overlay.addEventListener('click', () => {
 });
 
 // ══════════════════════════════════════
+// Theme Toggle (Dark/Light Mode)
+// ══════════════════════════════════════
+
+const themeToggle = document.getElementById('themeToggle');
+
+// Check saved theme or system preference
+const savedTheme = localStorage.getItem('theme');
+const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+
+if (savedTheme === 'light' || (!savedTheme && prefersLight)) {
+  document.documentElement.classList.add('light-mode');
+}
+
+themeToggle.addEventListener('click', () => {
+  document.documentElement.classList.toggle('light-mode');
+  const isLight = document.documentElement.classList.contains('light-mode');
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  
+  // Reload the map tiles if the map is initialized
+  if (mapInitialized && window.themeTileLayer) {
+    const tileUrl = isLight 
+      ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+      
+    window.themeTileLayer.setUrl(tileUrl);
+  }
+});
+
+// ══════════════════════════════════════
 // Dashboard — Leaflet Heatmap
 // ══════════════════════════════════════
 
@@ -95,8 +124,13 @@ async function initMap() {
       attributionControl: true,
     });
 
-    // Dark tile layer
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    const isLight = document.documentElement.classList.contains('light-mode');
+    const tileUrl = isLight 
+      ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+
+    // Store reference globally to update on theme toggle
+    window.themeTileLayer = L.tileLayer(tileUrl, {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
       subdomains: 'abcd',
       maxZoom: 19,
@@ -580,6 +614,8 @@ document.head.appendChild(style);
         const dy = my - cy;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
+        const isLight = document.documentElement.classList.contains('light-mode');
+
         if (dist < RADIUS) {
           const intensity = 1 - dist / RADIUS;
           const alpha = intensity * 0.18;
@@ -591,7 +627,7 @@ document.head.appendChild(style);
           ctx.lineWidth = 1;
           ctx.strokeRect(x + 0.5, y + 0.5, CELL, CELL);
         } else {
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.025)';
+          ctx.strokeStyle = isLight ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.025)';
           ctx.lineWidth = 1;
           ctx.strokeRect(x + 0.5, y + 0.5, CELL, CELL);
         }
@@ -603,6 +639,149 @@ document.head.appendChild(style);
 
   requestAnimationFrame(draw);
 })();
+
+// ══════════════════════════════════════
+// Interactive Quiz Integration
+// ══════════════════════════════════════
+
+let quizData = [];
+let quizCurrent = 0;
+let quizScore = 0;
+
+const quizModal = document.getElementById("quiz-modal");
+const openQuizBtn = document.getElementById("open-quiz-btn");
+const closeQuizBtn = document.querySelector(".quiz-close");
+
+// Open modal
+openQuizBtn.addEventListener('click', () => {
+    quizModal.style.display = "block";
+    if (quizData.length === 0) {
+        loadQuiz();
+    } else {
+        resetQuiz();
+        showQuizQuestion();
+    }
+});
+
+// Close modal
+closeQuizBtn.addEventListener('click', () => {
+    quizModal.style.display = "none";
+    resetQuiz();
+});
+
+// Close when clicking outside
+window.addEventListener('click', (event) => {
+    if (event.target == quizModal) {
+        quizModal.style.display = "none";
+        resetQuiz();
+    }
+});
+
+async function loadQuiz() {
+    try {
+        // Fetch from local flask backend
+        const res = await fetch("/quiz");
+        quizData = await res.json();
+        showQuizQuestion();
+    } catch (err) {
+        console.error("Failed to load quiz", err);
+    }
+}
+
+function resetQuiz() {
+    quizCurrent = 0;
+    quizScore = 0;
+    // Reset the quiz box HTML if it was changed
+    const quizBox = document.querySelector(".quiz-box");
+    if (!quizBox.querySelector("#quiz-progress")) {
+        quizBox.innerHTML = `
+            <p id="quiz-progress"></p>
+            <div id="quiz-progress-container">
+                <div id="quiz-progress-bar"></div>
+            </div>
+            <p class="quiz-message" id="quiz-message"></p>
+            <p>Would you trust this?</p>
+            <div class="quiz-buttons">
+                <button class="quiz-btn-yes" onclick="answerQuiz('Yes')">👍 Yes</button>
+                <button class="quiz-btn-no" onclick="answerQuiz('No')">👎 No</button>
+            </div>
+            <p id="quiz-result"></p>
+            <button id="quiz-next-btn" class="quiz-btn-next" onclick="nextQuizQuestion()" style="display:none;">Next</button>
+        `;
+    }
+}
+
+window.answerQuiz = function(userAns) {
+    let q = quizData[quizCurrent];
+    let result = document.getElementById("quiz-result");
+
+    if (userAns === q.correct) {
+        quizScore++;
+        result.innerHTML = "✅ Correct! <br>" + q.explanation;
+        result.className = "correct";
+    } else {
+        result.innerHTML = "❌ This is a scam! <br>" + q.explanation;
+        result.className = "incorrect";
+    }
+
+    // Disable buttons after answer
+    document.querySelector(".quiz-btn-yes").disabled = true;
+    document.querySelector(".quiz-btn-no").disabled = true;
+
+    // Show next button
+    document.getElementById("quiz-next-btn").style.display = "inline-block";
+}
+
+window.nextQuizQuestion = function() {
+    quizCurrent++;
+    if (quizCurrent >= quizData.length) {
+        showQuizResults();
+        return;
+    }
+    showQuizQuestion();
+}
+
+function showQuizQuestion() {
+    document.getElementById("quiz-progress").innerText =
+        "Question " + (quizCurrent + 1) + " / " + quizData.length;
+
+    // Update progress bar
+    const progressBar = document.getElementById("quiz-progress-bar");
+    const progressPercent = (quizCurrent / quizData.length) * 100;
+    progressBar.style.width = progressPercent + "%";
+
+    document.getElementById("quiz-message").innerText = quizData[quizCurrent].message;
+
+    document.getElementById("quiz-result").innerHTML = "";
+    document.getElementById("quiz-result").className = "";
+
+    // Enable buttons
+    document.querySelector(".quiz-btn-yes").disabled = false;
+    document.querySelector(".quiz-btn-no").disabled = false;
+    document.getElementById("quiz-next-btn").style.display = "none";
+}
+
+function showQuizResults() {
+    const percentage = Math.round((quizScore / quizData.length) * 100);
+    let message = "";
+    if (percentage >= 80) {
+        message = "Excellent! You're scam-savvy! 🛡️";
+    } else if (percentage >= 60) {
+        message = "Good job! Keep learning about scams. 📚";
+    } else {
+        message = "Be careful! Learn more about online safety. ⚠️";
+    }
+
+    document.querySelector(".quiz-box").innerHTML = `
+        <h2>Quiz Finished</h2>
+        <p>Your Score: ${quizScore} / ${quizData.length} (${percentage}%)</p>
+        <p>${message}</p>
+        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+            <button class="quiz-btn-next" onclick="resetQuiz(); showQuizQuestion();">Restart Quiz</button>
+            <button class="quiz-btn-next" onclick="document.getElementById('quiz-modal').style.display='none'; resetQuiz();" style="background: #ef4444;">Close</button>
+        </div>
+    `;
+}
 
 // ══════════════════════════════════════
 // Init — Load dashboard on page load
